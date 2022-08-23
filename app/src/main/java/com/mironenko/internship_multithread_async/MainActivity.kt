@@ -1,15 +1,13 @@
 package com.mironenko.internship_multithread_async
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mironenko.internship_multithread_async.databinding.ActivityMainBinding
-import com.mironenko.internship_multithread_async.util.MainFactory
-import io.reactivex.rxjava3.kotlin.subscribeBy
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
@@ -19,11 +17,9 @@ class MainActivity : AppCompatActivity() {
     private val mBinding get() = _binding!!
     private val dataAdapter = DataListAdapter()
     private val viewModel: DataListViewModel by lazy {
-        ViewModelProvider(
-            this,
-            MainFactory()
-        )[DataListViewModel::class.java]
+        ViewModelProvider(this)[DataListViewModel::class.java]
     }
+    private val composite = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,9 +28,9 @@ class MainActivity : AppCompatActivity() {
 
         showNumbersFromLiveData()
 
-//        showNumbersFromFlow()
+        showNumbersFromFlow()
 
-//        showNumbersFromObservable()
+        showNumbersFromObservable()
 
         mBinding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
@@ -43,16 +39,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showNumbersFromLiveData() {
-        viewModel.numbersLiveData.observe(this) {
+        viewModel.numbersLiveData().observe(this) {
             updateListInAdapter(it)
         }
     }
 
     private fun showNumbersFromObservable() {
-        viewModel.observable.subscribeBy {
-            Log.d("TAG", "Observer $it")
-            updateListInAdapter(it)
-        }
+        composite.add(viewModel.numbersObservable
+            .subscribe(
+                {
+                    updateListInAdapter(it)
+                },
+                {
+
+                }, {
+
+                }
+            ))
     }
 
     private fun showNumbersFromFlow() {
@@ -73,6 +76,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         _binding = null
+        composite.dispose()
         super.onDestroy()
     }
 }
