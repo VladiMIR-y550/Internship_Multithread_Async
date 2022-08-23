@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Internship_Multithread_Async</string>
+    <string name="value">value</string>
 </resources>
