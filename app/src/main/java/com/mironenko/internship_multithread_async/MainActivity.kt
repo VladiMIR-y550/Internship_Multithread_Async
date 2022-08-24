@@ -8,8 +8,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mironenko.internship_multithread_async.databinding.ActivityMainBinding
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 
 class MainActivity : AppCompatActivity() {
 
@@ -45,7 +43,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showNumbersFromObservable() {
-        composite.add(viewModel.numbersObservable
+        composite.add(viewModel.numbersObservable()
             .subscribe(
                 {
                     updateListInAdapter(it)
@@ -60,11 +58,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun showNumbersFromFlow() {
         lifecycleScope.launchWhenStarted {
-            viewModel.numbersStateFlow
-                .onEach {
+            viewModel.numbersStateFlow()
+                .collect {
                     updateListInAdapter(it)
                 }
-                .collect()
         }
     }
 
@@ -77,6 +74,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         _binding = null
         composite.dispose()
+        viewModel.stopLiveDataThread()
         super.onDestroy()
     }
 }
