@@ -39,8 +39,14 @@ class DataListViewModel : ViewModel() {
         val runnable = Runnable {
 
             for (num in 0 until GENERATED_COUNT) {
-                Thread.sleep(1000)
-                numbers.postValue(Random.nextInt(100))
+                if (!Thread.currentThread().isInterrupted) {
+                    try {
+                        Thread.sleep(1000)
+                        numbers.postValue(Random.nextInt(100))
+                    } catch (e: InterruptedException) {
+                        Thread.currentThread().interrupt()
+                    }
+                }
             }
         }
 
