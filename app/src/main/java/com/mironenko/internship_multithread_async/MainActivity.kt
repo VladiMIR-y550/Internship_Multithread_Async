@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mironenko.internship_multithread_async.databinding.ActivityMainBinding
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 
 class MainActivity : AppCompatActivity() {
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showNumbersFromObservable() {
         composite.add(viewModel.numbersObservable()
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
                     updateListInAdapter(it)
